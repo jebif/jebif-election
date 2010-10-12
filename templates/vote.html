@@ -18,7 +18,7 @@
 	<p class="errornote">Merci de corriger les erreurs ci-dessous.</p>
 {% endif %}
 
-{{ election.intro|escape|linebreaks }}
+{{ election.intro|safe|linebreaks }}
 
 <ol>
 <li>Lisez la description des candidats.</li>
