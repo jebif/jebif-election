@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="fr">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<link rel="stylesheet" href="{{ MEDIA_URL }}css/jebif.css" type="text/css"/>
+		<style type="text/css">
+		dt {
+			font-weight: bold;
+		}
+		</style>
+		<title>Élection JeBiF</title>
+	</head>
+	<body>
+
+<h1>Élection {{ election.label }}</h1>
+{% if form.errors %}
+	<p class="errornote">Merci de corriger les erreurs ci-dessous.</p>
+{% endif %}
+
+
+<ol>
+<li>Lisez la description des candidats.</li>
+<li>Sélectionnez les candidats que vous souhaitez élire :
+	<ul>
+	<li>Sélectionnez
+	{% ifnotequal election.min_choices 0 %}
+	<b>au moins {{ election.min_choices }}</b> et
+	{% endifnotequal %}
+	<b>au plus {{ election.max_choices }} candidats</b>.
+	</li>
+	<li>Pour voter <b>blanc</b>, ne sélectionnez aucun candidat.</li>
+	</ul>
+<li>Entrez votre clé de vote.</li>
+<li>Cliquez sur "Voter".</li>
+</ol>
+
+<h2>Description des candidats</h2>
+<dl>
+{% for candidat in election.candidate.all %}
+	<dt>{{ candidat.label|escape }}</dt>
+	<dd>{{ candidat.description|escape|linebreaks }}</dd>
+{% endfor %}
+</dl>
+
+<h2>Vote</h2>
+
+<form action="." method="post">
+	{% if form.errors %}
+		<p class="errornote">Merci de corriger les erreurs ci-dessous.</p>
+	{% endif %}
+	<table class="form">{{ form.as_table }}</table>
+	<p><input type="submit" value="Voter"/></p>
+</form>
+
+	</body>
+</html>
+
