@@ -9,6 +9,8 @@ from django.core.exceptions import ValidationError
 
 from django.contrib.auth.decorators import user_passes_test
 
+from django.contrib.sites.models import Site
+
 from jebif import settings
 
 import election.models as election
@@ -144,29 +146,55 @@ def results( request, election_id ) :
 
 @is_admin()
 def mailing( request, election_id ) :
-	info = MembershipInfo.objects.get(id=info_id)
-	info.active = True
-	info.inscription_date = datetime.date.today()
-	info.save()
+	el = election.Election.objects.get(id=election_id)
+	voters = el.voter.filter(hasvoted=False)
 
-	msg_from = "NO-REPLY@jebif.fr"
-	msg_to = [info.email]
-	msg_subj = "Bienvenue dans l'association JeBiF"
-	msg_txt = u"""
-Bonjour %s,
+	def validate_template( value ) :
+		if not "%ELECTION_PASSWD%" in value or not "%ELECTION_URL%" in value :
+			raise ValidationError(u"Macros %ELECTION_URL% ou %ELECTION_PASSWD non présentes")
 
-Nous avons bien pris en compte ton adhésion à l’association JeBiF. N’hésite pas à nous contacter si tu as des questions, des commentaires, des idées, etc…
+	class MailingForm( forms.Form ) :
+		email_from = forms.EmailField(label=u"Expéditeur", initial="iscb.rsg.france@gmail.com")
+		email_subject = forms.CharField(label=u"Sujet", initial="[JeBiF] ")
+		email_template = forms.CharField(label=u"Modèle du message",
+					widget=forms.Textarea(attrs={'cols': 90, 'rows': 30}),
+					help_text="Utiliser les macros %ELECTION_URL% et %ELECTION_PASSWD%",
+					validators=[validate_template])
+	
+	def template_instance(tmpl, ELECTION_PASSWD) :
+		ELECTION_URL = "http://%s%s" % (Site.objects.get_current().domain, el.get_absolute_url())
+		return tmpl.replace("%ELECTION_URL%", ELECTION_URL).replace("%ELECTION_PASSWD%", ELECTION_PASSWD)
 
-Tu connais sans doute déjà notre site internet http://jebif.fr. Tu peux aussi faire un tour sur notre page internationale du RSG-France.
-http://www.iscbsc.org/rsg/rsg-france
+	message = None
+	mode = "init"
+	if request.method == "POST" :
+		form = MailingForm(request.POST)
+		if form.is_valid() :
+			d = form.cleaned_data
+			message = {
+				"from": d["email_from"],
+				"subject": d["email_subject"],
+			}
 
-Tu vas être inscrit à la liste de discussion des membres de l’association. Tu pourras y consulter les archives si tu le souhaites.
-http://lists.jebif.fr/mailman/listinfo/membres
+			if "do_it" in request.POST :
+				for voter in voters :
+					msg_txt = template_instance(d["email_template"], voter.passwd)
+					send_mail(message["subject"], msg_txt, message["from"],
+							[voter.member.email])
 
-A bientôt,
-L’équipe du RSG-France (JeBiF)
-""" % info.firstname
-	send_mail(msg_subj, msg_txt, msg_from, msg_to)
+				return direct_to_template(request, "election/mailing-ok.html",
+						{"election": el, "voters": voters})
 
-	return HttpResponseRedirect("../../")
+			else :
+				mode = "preview"
+				passwd = "PASSWD_TEST"
+				message["preview"] = template_instance(d["email_template"], passwd)
+
+	else :
+		form = MailingForm()
+
+	return direct_to_template(request, "election/mailing-form.html",
+			{"election": el, "voters": voters, "form": form, "mode": mode,
+				"message": message})
+
 

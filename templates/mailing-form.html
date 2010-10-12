@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="fr">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<link rel="stylesheet" href="{{ MEDIA_URL }}css/jebif.css" type="text/css"/>
+		<style type="text/css">
+		th { vertical-align: top; text-align: right; }
+		</style>
+		<title>Élection JeBiF - Mailing</title>
+	</head>
+	<body>
+
+<h1>Mailing pour l'élection {{ election.label }}</h1>
+{% if form.errors %}
+	<p class="errornote">Merci de corriger les erreurs ci-dessous.</p>
+{% endif %}
+
+{% ifequal mode "preview" %}
+<h2>Aperçu</h2>
+
+<pre>
+From: {{ message.from }}
+Subject: {{ message.subject }}
+
+{{ message.preview }}
+</pre>
+
+Ce message sera envoyé aux personnes suivantes:
+{% for voter in voters %}
+{% ifnotequal forloop.counter0 0 %}, {% endifnotequal %}
+{{ voter.member.firstname }} {{ voter.member.lastname }} &lt;{{ voter.member.email }}&gt;{% endfor %}.
+
+<hr />
+{% endifequal %}
+
+<form action="." method="post">
+	<table>{{ form.as_table }}</table>
+	<p>
+	<input type="submit" value="Aperçu"/>
+	{% ifequal mode "preview" %}
+	<input type="submit" name="do_it" style="text-weight: bold" value="Envoyer les {{ voters|length }} mails"/>
+	{% endifequal %}
+	</p>
+</form>
+
+	</body>
+</html>
+

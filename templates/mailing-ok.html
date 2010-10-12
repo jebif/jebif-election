@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="fr">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<link rel="stylesheet" href="{{ MEDIA_URL }}css/jebif.css" type="text/css"/>
+		<style type="text/css">
+		th { vertical-align: top; text-align: right; }
+		</style>
+		<title>Élection JeBiF - Mailing</title>
+	</head>
+	<body>
+
+<h1>Mailing pour l'élection {{ election.label }}</h1>
+
+Message envoyé avec succès à 
+{% for voter in voters %}
+{% ifnotequal forloop.counter0 0 %}, {% endifnotequal %}
+{{ voter.member.firstname }} {{ voter.member.lastname }} &lt;{{ voter.member.email }}&gt;{% endfor %}.
+
+	</body>
+</html>
+
