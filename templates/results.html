@@ -57,7 +57,7 @@ Abstention: {{ results.voteB.abstained.pc|floatformat:2 }}% ({{results.voteB.abs
 <ol>
 {% for r in results.voteC.votes %}
 <li>
-{% if forloop.counter0 < election.max_choices and r.nb > 0 %}
+{% if r.pc >= 50 and forloop.counter0 < election.max_choices %}
 	<b>{{ r.candidate.label }}</b>: 
 {% else %}
 	{{ r.candidate.label }}:
