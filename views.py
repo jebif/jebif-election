@@ -97,7 +97,9 @@ def is_admin() :
 def results( request, election_id ) :
 	el = election.Election.objects.get(id=election_id)
 
+	nb_voters = el.voter.count()
 	total = el.vote_set.count()
+	participation = (100.*total)/nb_voters
 
 	def make_pc( e, t ) :
 		if t > 0 :
@@ -143,7 +145,8 @@ def results( request, election_id ) :
 	}
 
 	return direct_to_template(request, "election/results.html", 
-		{"election": el, "total": total, "results": results})
+		{"election": el, "nb_voters": nb_voters, "participation": participation,
+			"total": total, "results": results})
 	
 
 @is_admin()

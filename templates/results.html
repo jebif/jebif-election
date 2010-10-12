@@ -19,7 +19,7 @@
 <p><b>Élection en cours&nbsp;!</b></p>
 {% endif %}
 
-<p>Total : <b>{{ total }}</b> votes.</p>
+<p>Total : <b>{{ total }}</b> votes (sur {{ nb_voters }} inscrits; particpation: {{ participation|floatformat:2 }}%).</p>
 
 <hr />
 <p>Vote A : Bilan moral
