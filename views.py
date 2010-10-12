@@ -40,7 +40,14 @@ def vote( request, election_id ) :
 			raise ValidationError(u"Clef de vote inconnue.")
 
 	class VoteForm( forms.Form ) :
-		candidates = forms.MultipleChoiceField(label=u"Vote (%d maximum)" % el.max_choices,
+		voteA = forms.ChoiceField(label=u"Vote A : Bilan moral - \"Approuvez vous le bilan moral de l'association ?\"",
+						choices=election.Vote._meta.get_field("voteA").choices,
+						widget=forms.RadioSelect)
+		voteB = forms.ChoiceField(label=u"Vote B : Bilan financier - \"Approuvez vous le bilan moral de l'association ?\"",
+						choices=election.Vote._meta.get_field("voteB").choices,
+						widget=forms.RadioSelect)
+		candidates = forms.MultipleChoiceField(label=u"Vote C : Renouvellement du Conseil d'Administration - " +
+				u"\"Voulez-vous que la personne suivante fasse partie du Conseil d'Administration ?\" (%d maximum)" % el.max_choices,
 						required=False,
 						choices=candidate_choices,
 						widget=forms.CheckboxSelectMultiple,
@@ -61,6 +68,8 @@ def vote( request, election_id ) :
 
 			vote = election.Vote(election=el)
 			vote.trace = trace
+			vote.voteA = d["voteA"]
+			vote.voteB = d["voteB"]
 			vote.save()
 			vote.choices = d["candidates"]
 			voter.hasvoted = True
@@ -86,13 +95,48 @@ def is_admin() :
 def results( request, election_id ) :
 	el = election.Election.objects.get(id=election_id)
 
-	results = [ { "candidate" : c, "nb" : c.vote_set.count() }
-					for c in el.candidate.all()]
-	get_nb = operator.itemgetter("nb")
-	results.sort(key=get_nb, reverse=True)
-	total = sum(map(get_nb, results))
-	for r in results :
-		r["pc"] = (100.*r["nb"])/total
+	total = el.vote_set.count()
+
+	def make_pc( e, t ) :
+		if t > 0 :
+			e["pc"] = (100.*e["nb"])/t
+		else :
+			e["pc"] = 0.
+
+	def make_votes( r ) :
+		get_nb = operator.itemgetter("nb")
+		r.sort(key=get_nb, reverse=True)
+		t = sum(map(get_nb, r))
+		for e in r :
+			make_pc(e,t)
+		return t
+
+	def make_abstained( e ) :
+		make_pc(e, total)
+
+	def tristate_result( field ) :
+		r = []
+		a = None
+		for (val, label) in election.Vote._meta.get_field(field).choices :
+			d = {"value": val, "label": label, "nb": el.vote_set.filter(**{field: val}).count()}
+			if val != 0 :
+				r.append(d)
+			else :
+				a = d
+		make_votes(r)
+		make_abstained(a)
+		return {"votes": r, "abstained": a}
+			
+	rC = [ { "candidate" : c, "nb" : c.vote_set.count() } for c in el.candidate.all()]
+	tC = make_votes(rC)
+	aC = {"nb": total-tC}
+	make_abstained(aC)
+
+	results = {
+		"voteA" : tristate_result("voteA"),
+		"voteB" : tristate_result("voteB"),
+		"voteC" : {"votes": rC, "abstained": aC}
+	}
 
 	return direct_to_template(request, "election/results.html", 
 		{"election": el, "total": total, "results": results})

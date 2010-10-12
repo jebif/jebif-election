@@ -14,6 +14,7 @@ class Election( models.Model ) :
 	label = models.CharField(u"Libellé", max_length=50)
 	max_choices = models.PositiveSmallIntegerField()
 	min_choices = models.PositiveSmallIntegerField(default=0)
+	intro = models.TextField("Introduction")
 	def __unicode__( self ) :
 		return "%s" % self.label
 	def get_absolute_url( self ) :
@@ -33,8 +34,23 @@ class Voter( models.Model ) :
 	def __unicode__( self ) :
 		return u"%s/%s" % (self.election, self.member)
 
+
+class Tristate( models.SmallIntegerField ) :
+	YES = 1
+	NO = -1
+	INCONC = 0
+	def __init__( self, **kwargs ) :
+		kwargs["choices"] = (
+			(self.YES, "oui"),
+			(self.NO, "non"),
+			(self.INCONC, "s'abstient"),
+		)
+		models.SmallIntegerField.__init__(self, **kwargs)
+
 class Vote( models.Model ) :
-	election = models.ForeignKey(Election, related_name='vote')
+	election = models.ForeignKey(Election)
+	voteA = Tristate()
+	voteB = Tristate()
 	choices = models.ManyToManyField(Candidate)
 	trace = models.CharField(max_length=255)
 

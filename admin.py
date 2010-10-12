@@ -23,7 +23,7 @@ class ElectionAdmin( admin.ModelAdmin ) :
 			if len(votersids) != len(set(votersids)) :
 				messages.error(request, "%s: duplicated voters!!")
 			# len(vote) == len(voter/hasvoted)
-			if el.vote.count() != el.voter.filter(hasvoted=True).count() :
+			if el.vote_set.count() != el.voter.filter(hasvoted=True).count() :
 				message.error(request, "%s: mismatch number of votes/voters")
 	check_integrity.short_description = "Check integrity of selected elections"
 

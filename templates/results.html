@@ -19,10 +19,43 @@
 <p><b>Élection en cours&nbsp;!</b></p>
 {% endif %}
 
-<p>Total: <b>{{ total }}</b> votes.</p>
+<p>Total : <b>{{ total }}</b> votes.</p>
 
+<hr />
+<p>Vote A : Bilan moral
 <ol>
-{% for r in results %}
+{% for r in results.voteA.votes %}
+<li>
+	{% ifequal forloop.counter0 0 %}<b>{% endifequal %}
+	{{ r.label }} {% ifequal forloop.counter0 0 %}</b>{% endifequal %}:
+	{{ r.pc|floatformat:2 }}%
+	({{ r.nb }} votes)
+</li>
+{% endfor %}
+</ol>
+Abstention: {{ results.voteA.abstained.pc|floatformat:2 }}% ({{results.voteA.abstained.nb}} votes blancs).
+</p>
+
+<hr />
+<p>Vote B : Bilan financier
+<ol>
+{% for r in results.voteB.votes %}
+<li>
+	{% if forloop.counter0 == 0 and r.nb > 0 %}<b>{% endif %}
+	{{ r.label }}{% if forloop.counter0 == 0 and r.nb > 0 %}</b>{% endif %} :
+	{{ r.pc|floatformat:2 }}%
+	({{ r.nb }} votes)
+</li>
+{% endfor %}
+</ol>
+Abstention: {{ results.voteB.abstained.pc|floatformat:2 }}% ({{results.voteB.abstained.nb}} votes blancs).
+</p>
+<hr />
+
+	
+<p>Vote C - Membres CA
+<ol>
+{% for r in results.voteC.votes %}
 <li>
 {% if forloop.counter0 < election.max_choices and r.nb > 0 %}
 	<b>{{ r.candidate.label }}</b>: 
@@ -33,6 +66,8 @@
 		({{ r.nb }} votes)</li>
 {% endfor %}
 </ol>
+Abstention: {{ results.voteC.abstained.pc|floatformat:2 }}% ({{results.voteC.abstained.nb}} votes blancs).
+</p>
 
 
 	</body>
