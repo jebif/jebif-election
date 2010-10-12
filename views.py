@@ -131,7 +131,9 @@ def results( request, election_id ) :
 			
 	rC = [ { "candidate" : c, "nb" : c.vote_set.count() } for c in el.candidate.all()]
 	tC = make_votes(rC)
-	aC = {"nb": total-tC}
+	
+	aC_nb = el.vote_set.exclude(choices__in=el.candidate.all()).count()
+	aC = {"nb": aC_nb}
 	make_abstained(aC)
 
 	results = {
