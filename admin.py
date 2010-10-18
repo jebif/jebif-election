@@ -38,7 +38,7 @@ class ElectionAdmin( admin.ModelAdmin ) :
 		
 	def populate_voters( celf, request, queryset ) :
 		for el in queryset :
-			new_voters = membership.MembershipInfo.objects.filter(active=True).exclude(voter__election=el)
+			new_voters = membership.MembershipInfo.objects.filter(active=True, deleted=False).exclude(voter__election=el)
 			for mi in new_voters :
 				nv = election.Voter(election=el, member=mi)
 				nv.passwd = "".join([random.choice("abcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*(-_=+)") for i in range(32)])
