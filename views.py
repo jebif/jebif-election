@@ -131,15 +131,17 @@ def results( request, election_id ) :
 		make_abstained(a)
 		return {"votes": r, "abstained": a}
 
-	rC = []
-	for c in el.candidate.all() :
-		nb = c.vote_set.count()
-		rC.append({"candidate" : c, "pc": (100.*nb)/nb_voters, "nb": nb })
-	rC.sort(key=operator.itemgetter("pc"), reverse=True)
 
 	aC_nb = el.vote_set.exclude(choices__in=el.candidate.all()).count()
 	aC = {"nb": aC_nb}
 	make_abstained(aC)
+
+	base = nb_voters - aC_nb
+	rC = []
+	for c in el.candidate.all() :
+		nb = c.vote_set.count()
+		rC.append({"candidate" : c, "pc": (100.*nb)/base, "nb": nb })
+	rC.sort(key=operator.itemgetter("pc"), reverse=True)
 
 	results = {
 		"voteA" : tristate_result("voteA"),
