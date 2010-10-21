@@ -170,6 +170,8 @@ def mailing( request, election_id ) :
 					widget=forms.Textarea(attrs={'cols': 90, 'rows': 30}),
 					help_text="Utiliser les macros %ELECTION_URL% et %ELECTION_PASSWD%",
 					validators=[validate_template])
+		attachment1 = forms.FileField(label=u"Attachement 1", required=False)
+		attachment2 = forms.FileField(label=u"Attachement 2", required=False)
 	
 	def template_instance(tmpl, ELECTION_PASSWD) :
 		ELECTION_URL = "http://%s%s" % (Site.objects.get_current().domain, el.get_absolute_url())
@@ -178,19 +180,28 @@ def mailing( request, election_id ) :
 	message = None
 	mode = "init"
 	if request.method == "POST" :
-		form = MailingForm(request.POST)
+		form = MailingForm(request.POST, request.FILES)
 		if form.is_valid() :
 			d = form.cleaned_data
 			message = {
 				"from": d["email_from"],
 				"subject": d["email_subject"],
+				"attachment1" : d["attachment1"],
+				"attachment2" : d["attachment2"],
 			}
 
 			if "do_it" in request.POST :
 				for voter in voters :
 					msg_txt = template_instance(d["email_template"], voter.passwd)
-					send_mail(message["subject"], msg_txt, message["from"],
-							[voter.member.email])
+					email = EmailMessage(message["subject"], msg_txt, message["from"],
+								[voter.member.email])
+					def attach( uf ) :
+						if uf is None :
+							return
+						email.attach(uf.name, uf.read(), uf.content_type)
+					attach(message["attachment1"])
+					attach(message["attachment2"])
+					email.send()
 
 				return direct_to_template(request, "election/mailing-ok.html",
 						{"election": el, "voters": voters})
