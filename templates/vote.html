@@ -37,14 +37,6 @@
 <li>Cliquez sur "Voter".</li>
 </ol>
 
-<h2>Description des candidats</h2>
-<dl>
-{% for candidat in election.candidate.all %}
-	<dt>{{ candidat.label|escape }}</dt>
-	<dd>{{ candidat.description|escape|linebreaks }}</dd>
-{% endfor %}
-</dl>
-
 <h2>Vote</h2>
 
 <form action="." method="post">
@@ -54,6 +46,14 @@
 	{{ form.as_p }}
 	<p><input type="submit" value="Voter"/></p>
 </form>
+
+<h2>Description des candidats</h2>
+<dl>
+{% for candidat in election.candidate.all %}
+	<dt>{{ candidat.label|escape }}</dt>
+	<dd>{{ candidat.description|escape|linebreaks }}</dd>
+{% endfor %}
+</dl>
 
 	</body>
 </html>
