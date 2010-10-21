@@ -48,8 +48,10 @@ def vote( request, election_id ) :
 		voteB = forms.ChoiceField(label=u"Vote B : Bilan financier - \"Approuvez vous le bilan financier de l'association ?\"",
 						choices=election.Vote._meta.get_field("voteB").choices,
 						widget=forms.RadioSelect)
-		candidates = forms.MultipleChoiceField(label=u"Vote C : Renouvellement du Conseil d'Administration - " +
-				u"\"Voulez-vous que la personne suivante fasse partie du Conseil d'Administration ?\" (%d maximum)" % el.max_choices,
+		candidates = forms.MultipleChoiceField(label=u"Vote C : Renouvellement du Conseil d'Administration - "
+				+ u"\"Voulez-vous que la personne suivante fasse partie du Conseil d'Administration ?\""
+				+ ((u" (%d maximum)" % el.max_choices) if el.max_choices < el.candidate.count()
+						else u" (sélectionnez tous les candidats que vous souhaitez voir élus)"),
 						required=False,
 						choices=candidate_choices,
 						widget=forms.CheckboxSelectMultiple,

@@ -29,7 +29,11 @@
 	{% ifnotequal election.min_choices 0 %}
 	<b>au moins {{ election.min_choices }}</b> et
 	{% endifnotequal %}
+	{% if election.max_choices >= election.candidate.count %}
+	<b>tous les candidats que vous souhaitez voir élus</b>.
+	{% else %}
 	<b>au plus {{ election.max_choices }} candidats</b>.
+	{% endif %}
 	</li>
 	<li>Pour voter <b>blanc</b>, ne sélectionnez aucun candidat.</li>
 	</ul>
