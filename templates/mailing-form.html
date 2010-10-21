@@ -19,7 +19,7 @@
 {% ifequal mode "preview" %}
 <h2>Aperçu</h2>
 
-<pre>
+<pre style="white-space: pre-wrap">
 From: {{ message.from }}
 Subject: {{ message.subject }}
 {% if message.attachment1 %}Attachment: {{ message.attachment1.name }}
