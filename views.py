@@ -45,7 +45,7 @@ def vote( request, election_id ) :
 		voteA = forms.ChoiceField(label=u"Vote A : Bilan moral - \"Approuvez vous le bilan moral de l'association ?\"",
 						choices=election.Vote._meta.get_field("voteA").choices,
 						widget=forms.RadioSelect)
-		voteB = forms.ChoiceField(label=u"Vote B : Bilan financier - \"Approuvez vous le bilan moral de l'association ?\"",
+		voteB = forms.ChoiceField(label=u"Vote B : Bilan financier - \"Approuvez vous le bilan financier de l'association ?\"",
 						choices=election.Vote._meta.get_field("voteB").choices,
 						widget=forms.RadioSelect)
 		candidates = forms.MultipleChoiceField(label=u"Vote C : Renouvellement du Conseil d'Administration - " +
