@@ -170,14 +170,16 @@ def mailing( request, election_id ) :
 		email_subject = forms.CharField(label=u"Sujet", initial="[JeBiF] ")
 		email_template = forms.CharField(label=u"Modèle du message",
 					widget=forms.Textarea(attrs={'cols': 90, 'rows': 30}),
-					help_text="Utiliser les macros %ELECTION_URL% et %ELECTION_PASSWD%",
+					help_text="Utiliser les macros %ELECTION_URL% et %ELECTION_PASSWD%. Optionnellement: %VOTER_FIRSTNAME%.",
 					validators=[validate_template])
 		attachment1 = forms.FileField(label=u"Attachement 1", required=False)
 		attachment2 = forms.FileField(label=u"Attachement 2", required=False)
 	
-	def template_instance(tmpl, ELECTION_PASSWD) :
+	def template_instance(tmpl, voter) :
 		ELECTION_URL = "http://%s%s" % (Site.objects.get_current().domain, el.get_absolute_url())
-		return tmpl.replace("%ELECTION_URL%", ELECTION_URL).replace("%ELECTION_PASSWD%", ELECTION_PASSWD)
+		return tmpl.replace("%ELECTION_URL%", ELECTION_URL).replace(
+					"%ELECTION_PASSWD%", voter.passwd).replace(
+					"%VOTER_FIRSTNAME%", voter.member.firstname)
 
 	message = None
 	mode = "init"
@@ -194,7 +196,7 @@ def mailing( request, election_id ) :
 
 			if "do_it" in request.POST :
 				for voter in voters :
-					msg_txt = template_instance(d["email_template"], voter.passwd)
+					msg_txt = template_instance(d["email_template"], voter)
 					email = EmailMessage(message["subject"], msg_txt, message["from"],
 								[voter.member.email])
 					def attach( uf ) :
@@ -210,8 +212,13 @@ def mailing( request, election_id ) :
 
 			else :
 				mode = "preview"
-				passwd = "PASSWD_TEST"
-				message["preview"] = template_instance(d["email_template"], passwd)
+				class member :
+					firstname = u"Loïc"
+				m = member()
+				class voter :
+					passwd = "PASSWD_TEST"
+					member = m
+				message["preview"] = template_instance(d["email_template"], voter())
 
 	else :
 		form = MailingForm()
