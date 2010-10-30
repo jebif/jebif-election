@@ -195,14 +195,18 @@ def mailing( request, election_id ) :
 			}
 
 			if "do_it" in request.POST :
+				def prep_attach( uf ) :
+					if uf :
+						return { "name": uf.name, "data": uf.read(), "content_type": uf.content_type }
+				message["attachment1"] = prep_attach(message["attachment1"])
+				message["attachment2"] = prep_attach(message["attachment2"])
 				for voter in voters :
 					msg_txt = template_instance(d["email_template"], voter)
 					email = EmailMessage(message["subject"], msg_txt, message["from"],
 								[voter.member.email])
 					def attach( uf ) :
-						if uf is None :
-							return
-						email.attach(uf.name, uf.read(), uf.content_type)
+						if uf :
+							email.attach(uf["name"], uf["data"], uf["content_type"])
 					attach(message["attachment1"])
 					attach(message["attachment2"])
 					email.send()
