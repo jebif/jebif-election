@@ -159,13 +159,15 @@ def results( request, election_id ) :
 @is_admin()
 def mailing( request, election_id ) :
 	el = election.Election.objects.get(id=election_id)
-	voters = el.voter.filter(hasvoted=False)
 
 	def validate_template( value ) :
 		if not "%ELECTION_PASSWD%" in value or not "%ELECTION_URL%" in value :
 			raise ValidationError(u"Macros %ELECTION_URL% ou %ELECTION_PASSWD non présentes")
 
 	class MailingForm( forms.Form ) :
+		email_to = forms.ChoiceField(label=u"Destinataires", choices=[
+						("hasnotvoted", u"Seuls les inscrits n'ayant pas voté"),
+						("allvoters", u"Tous les inscrits au vote"),])
 		email_from = forms.EmailField(label=u"Expéditeur", initial="iscb.rsg.france@gmail.com")
 		email_subject = forms.CharField(label=u"Sujet", initial="[JeBiF] ")
 		email_template = forms.CharField(label=u"Modèle du message",
@@ -183,6 +185,7 @@ def mailing( request, election_id ) :
 
 	message = None
 	mode = "init"
+	voters = None
 	if request.method == "POST" :
 		form = MailingForm(request.POST, request.FILES)
 		if form.is_valid() :
@@ -193,6 +196,10 @@ def mailing( request, election_id ) :
 				"attachment1" : d["attachment1"],
 				"attachment2" : d["attachment2"],
 			}
+			if d["email_to"] == "hasnotvoted":
+				voters = el.voter.filter(hasvoted=False)
+			else :
+				voters = el.voter.all()
 
 			if "do_it" in request.POST :
 				def prep_attach( uf ) :
