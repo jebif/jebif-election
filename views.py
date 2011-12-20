@@ -65,8 +65,8 @@ def vote( request, election_id ) :
 		if form.is_valid() :
 			d = form.cleaned_data
 
-			trace = "%s %s(%s)" % (datetime.datetime.now(), request.META["REMOTE_HOST"], 
-						request.META["REMOTE_ADDR"])
+			trace = "%s %s(%s)" % (datetime.datetime.now(), request.META.get("REMOTE_HOST"), 
+						request.META.get("REMOTE_ADDR"))
 
 			voter = el.voter.get(passwd=d["passwd"])
 
@@ -81,7 +81,7 @@ def vote( request, election_id ) :
 			vote.save()
 			voter.save()
 
-			return HttpResponseRedirect("ok")
+			return HttpResponseRedirect("ok/")
 	else :
 		form = VoteForm()
 
