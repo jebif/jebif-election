@@ -22,7 +22,7 @@
 <p>Total : <b>{{ total }}</b> votes (sur {{ nb_voters }} inscrits; participation: {{ participation|floatformat:2 }}%).</p>
 
 <hr />
-<p>Vote A : Bilan moral
+<p>Vote A : {{ election.voteA_label }}
 <ol>
 {% for r in results.voteA.votes %}
 <li>
@@ -36,8 +36,9 @@
 Abstention: {{ results.voteA.abstained.pc|floatformat:2 }}% ({{results.voteA.abstained.nb}} votes blancs).
 </p>
 
+{% if election.voteB_label %}
 <hr />
-<p>Vote B : Bilan financier
+<p>Vote B : {{ election.voteB_label }}
 <ol>
 {% for r in results.voteB.votes %}
 <li>
@@ -50,9 +51,10 @@ Abstention: {{ results.voteA.abstained.pc|floatformat:2 }}% ({{results.voteA.abs
 </ol>
 Abstention: {{ results.voteB.abstained.pc|floatformat:2 }}% ({{results.voteB.abstained.nb}} votes blancs).
 </p>
-<hr />
+{% endif %}
 
-	
+{% if election.max_choices > 0 %}
+<hr />
 <p>Vote C : Membres CA
 <ol>
 {% for r in results.voteC.votes %}
@@ -68,6 +70,7 @@ Abstention: {{ results.voteB.abstained.pc|floatformat:2 }}% ({{results.voteB.abs
 </ol>
 Abstention: {{ results.voteC.abstained.pc|floatformat:2 }}% ({{results.voteC.abstained.nb}} votes blancs).
 </p>
+{% endif %}
 
 
 	</body>
