@@ -42,13 +42,15 @@ def vote( request, election_id ) :
 			raise ValidationError(u"Clef de vote inconnue.")
 
 	class VoteForm( forms.Form ) :
-		voteA = forms.ChoiceField(label=u"Vote A : Bilan moral - \"Approuvez vous le bilan moral de l'association ?\"",
+		voteA = forms.ChoiceField(label=u"Vote A : %s" % el.voteA_label, # Bilan moral - \"Approuvez vous le bilan moral de l'association ?\"",
 						choices=election.Vote._meta.get_field("voteA").choices,
 						widget=forms.RadioSelect)
-		voteB = forms.ChoiceField(label=u"Vote B : Bilan financier - \"Approuvez vous le bilan financier de l'association ?\"",
+		if el.voteB_label :
+			voteB = forms.ChoiceField(label=u"Vote B : %s" % el.voteB_label, # Bilan financier - \"Approuvez vous le bilan financier de l'association ?\"",
 						choices=election.Vote._meta.get_field("voteB").choices,
 						widget=forms.RadioSelect)
-		candidates = forms.MultipleChoiceField(label=u"Vote C : Renouvellement du Conseil d'Administration - "
+		if el.max_choices > 0 :
+			candidates = forms.MultipleChoiceField(label=u"Vote C : Renouvellement du Conseil d'Administration - "
 				+ u"\"Voulez-vous que la personne suivante fasse partie du Conseil d'Administration ?\""
 				+ ((u" (%d maximum)" % el.max_choices) if el.max_choices < el.candidate.count()
 						else u" (sélectionnez tous les candidats que vous souhaitez voir élus)"),
@@ -73,9 +75,9 @@ def vote( request, election_id ) :
 			vote = election.Vote(election=el)
 			vote.trace = trace
 			vote.voteA = d["voteA"]
-			vote.voteB = d["voteB"]
+			vote.voteB = d["voteB"] if "voteB" in d else 0
 			vote.save()
-			vote.choices = d["candidates"]
+			vote.choices = d["candidates"] if "candidates" in d else []
 			voter.hasvoted = True
 			voter.trace = trace
 			vote.save()

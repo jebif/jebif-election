@@ -20,6 +20,7 @@
 
 {{ election.intro|safe|linebreaks }}
 
+{% if election.max_choices > 0 %}
 <ol>
 <li>Lisez la description des candidats.</li>
 <li>Votez les bilans.</li>
@@ -40,6 +41,7 @@
 <li>Entrez votre clé de vote.</li>
 <li>Cliquez sur "Voter".</li>
 </ol>
+{% endif %}
 
 <h2>Vote</h2>
 
@@ -51,6 +53,7 @@
 	<p><input type="submit" value="Voter"/></p>
 </form>
 
+{% if election.max_choices > 0 %}
 <h2>Description des candidats</h2>
 <dl>
 {% for candidat in election.candidate.all %}
@@ -58,6 +61,7 @@
 	<dd>{{ candidat.description|escape|linebreaks }}</dd>
 {% endfor %}
 </dl>
+{% endif %}
 
 	</body>
 </html>

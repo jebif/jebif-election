@@ -15,6 +15,8 @@ class Election( models.Model ) :
 	max_choices = models.PositiveSmallIntegerField()
 	min_choices = models.PositiveSmallIntegerField(default=0)
 	intro = models.TextField("Introduction")
+	voteA_label = models.CharField(u"Vote A", max_length=150, blank=True)
+	voteB_label = models.CharField(u"Vote B", max_length=150, blank=True)
 	def __unicode__( self ) :
 		return "%s" % self.label
 	def get_absolute_url( self ) :
