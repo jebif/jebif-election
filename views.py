@@ -103,13 +103,10 @@ def results( request, election_id ) :
 
 	nb_voters = el.voter.count()
 	total = el.vote_set.count()
-	participation = (100.*total)/nb_voters
+	participation = (100.*total)/nb_voters if nb_voters > 0 else 0
 
 	def make_pc( e, t ) :
-		if t > 0 :
-			e["pc"] = (100.*e["nb"])/t
-		else :
-			e["pc"] = 0.
+		e["pc"] = (100.*e["nb"])/t if t > 0 else 0.
 
 	def make_votes( r ) :
 		get_nb = operator.itemgetter("nb")
@@ -144,7 +141,7 @@ def results( request, election_id ) :
 	rC = []
 	for c in el.candidate.all() :
 		nb = c.vote_set.count()
-		rC.append({"candidate" : c, "pc": (100.*nb)/base, "nb": nb })
+		rC.append({"candidate" : c, "pc": (100.*nb)/base if base > 0 else 0, "nb": nb })
 	rC.sort(key=operator.itemgetter("pc"), reverse=True)
 
 	results = {
