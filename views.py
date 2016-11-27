@@ -166,7 +166,8 @@ def mailing( request, election_id ) :
 	class MailingForm( forms.Form ) :
 		email_to = forms.ChoiceField(label=u"Destinataires", choices=[
 						("hasnotvoted", u"Seuls les inscrits n'ayant pas voté"),
-						("allvoters", u"Tous les inscrits au vote"),])
+						("allvoters", u"Tous les inscrits au vote"),
+						("custom", u"Personnalisé"),])
 		email_from = forms.EmailField(label=u"Expéditeur", initial="iscb.rsg.france@gmail.com")
 		email_subject = forms.CharField(label=u"Sujet", initial="[JeBiF] ")
 		email_template = forms.CharField(label=u"Modèle du message",
@@ -197,8 +198,13 @@ def mailing( request, election_id ) :
 			}
 			if d["email_to"] == "hasnotvoted":
 				voters = el.voter.filter(hasvoted=False)
-			else :
+			elif d["email_to"] == "allvoters":
 				voters = el.voter.all()
+			elif d["email_to"] == "custom":
+				voters = el.voter.filter(member__email__in=[
+						"lucas_jojo@msn.com", "contact@creatox.com", 
+						"evelyne.duvernois@mnhn.fr", "itissame@hotmail.fr"
+					])
 
 			if "do_it" in request.POST :
 				def prep_attach( uf ) :
